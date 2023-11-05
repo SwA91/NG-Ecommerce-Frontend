@@ -2,6 +2,7 @@
     <div class="section-content section-content-p30">
         <div class="container-fluid">
             <div class="row">
+
                 <div *ngFor="let tempProduct of products" class="col-md-3">
                     <div class="product-box">
                         <img src="{{tempProduct.imageUrl}}" alt="{{tempProduct.name}}" class="img-responsive">
@@ -10,6 +11,12 @@
                         <a href="#" class="primary-btn"> Add to cart</a>
                     </div>
                 </div>
+
+                <!-- if products emtpy then display a message -->
+                <div role="alert" *ngIf="products?.length == 0" class="alert alert-warning col-md-12">
+                    No products found.
+                </div>
+
             </div>
         </div>
     </div>
