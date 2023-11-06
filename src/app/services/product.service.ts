@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Product } from '../common/product';
-import { Observable } from 'rxjs';
+import { Observable, ObservedValueOf } from 'rxjs';
 import { map } from "rxjs/operators";
 import { ProductCategory } from '../common/product-category';
 
@@ -16,6 +16,14 @@ export class ProductService {
   constructor(
     private httpCliente: HttpClient
   ) { }
+
+  getProduct(theProductId: number): Observable<Product> {
+
+    // need to build URL base on product id
+    const productUrl = `${this.baseUrl}/${theProductId}`;
+
+    return this.httpCliente.get<Product>(productUrl);
+  }
 
   searchProducts(theKeyword: string): Observable<Product[]> {
 
