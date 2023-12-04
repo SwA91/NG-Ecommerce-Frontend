@@ -15,16 +15,13 @@ export class CartService {
   addToCart(theCartItem: CartItem) {
     // check if we already have the item in our cart
     let alreadyExistsInCart: boolean = false;
-    let existingCartItem: CartItem | null = null;
+    let existingCartItem: CartItem | undefined = undefined;
 
     if (this.cartItems.length > 0) {
       // find the item in the cart based on item id
-      for (const temCartItem of this.cartItems) {
-        if (temCartItem.id === theCartItem.id) {
-          existingCartItem = temCartItem;
-          break;
-        }
-      }
+      existingCartItem = this.cartItems.find(
+        tempCartItem => tempCartItem.id === theCartItem.id
+      );
       // check if we found it
       alreadyExistsInCart = !!existingCartItem;
     }
