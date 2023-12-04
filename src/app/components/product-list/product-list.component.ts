@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute } from '@angular/router';
 import { Product } from 'src/app/common/product';
 import { ProductService } from 'src/app/services/product.service';
 
@@ -11,7 +11,6 @@ import { ProductService } from 'src/app/services/product.service';
   styleUrls: ['./product-list.component.css'],
 })
 export class ProductListComponent implements OnInit {
-
   products: Product[] = [];
   currentCategoryId: number = 1;
   searchMode: boolean = false;
@@ -24,14 +23,13 @@ export class ProductListComponent implements OnInit {
 
   constructor(
     private activatedRoute: ActivatedRoute,
-    private productSerivce: ProductService
-  ) { }
+    private productService: ProductService
+  ) {}
 
   ngOnInit(): void {
-    this.activatedRoute.paramMap.subscribe(
-      () => {
-        this.listProducts();
-      });
+    this.activatedRoute.paramMap.subscribe(() => {
+      this.listProducts();
+    });
   }
 
   updatePageSize(pageSize: string) {
@@ -52,11 +50,13 @@ export class ProductListComponent implements OnInit {
 
   handleListProducts(_pageNumber: number = 1) {
     // check if "id" parameter is available
-    const hasCategoryId: boolean = this.activatedRoute.snapshot.paramMap.has('id');
+    const hasCategoryId: boolean =
+      this.activatedRoute.snapshot.paramMap.has('id');
 
     if (hasCategoryId) {
       // get the id param string, convert string to a number using the + symbol
-      this.currentCategoryId = +this.activatedRoute.snapshot.paramMap.get('id')!;
+      this.currentCategoryId =
+        +this.activatedRoute.snapshot.paramMap.get('id')!;
     } else {
       // not category id available ... default to category id 1
       this.currentCategoryId = 1;
@@ -73,25 +73,27 @@ export class ProductListComponent implements OnInit {
 
     this.previousCategoryId = this.currentCategoryId;
 
-    // now get the products for the given category id 
-    this.productSerivce.getProductListPaginate(
-      _pageNumber,
-      this.thePageSize,
-      this.currentCategoryId
-    ).subscribe(data => {
-      this.products = data._embedded.products;
-      this.thePageNumber = data.page.number + 1;
-      this.thePageSize = data.page.size;
-      this.theTotalElements = data.page.totalElements;
-    });
+    // now get the products for the given category id
+    this.productService
+      .getProductListPaginate(
+        _pageNumber,
+        this.thePageSize,
+        this.currentCategoryId
+      )
+      .subscribe(data => {
+        this.products = data._embedded.products;
+        this.thePageNumber = data.page.number + 1;
+        this.thePageSize = data.page.size;
+        this.theTotalElements = data.page.totalElements;
+      });
   }
 
-
   handleSearchProducts() {
-    const theKeyword: string = this.activatedRoute.snapshot.paramMap.get('keyword')!;
+    const theKeyword: string =
+      this.activatedRoute.snapshot.paramMap.get('keyword')!;
 
     // now search for the products using keyword
-    this.productSerivce.searchProducts(theKeyword).subscribe(data => {
+    this.productService.searchProducts(theKeyword).subscribe(data => {
       this.products = data;
     });
   }
