@@ -386,6 +386,7 @@
         <div formGroupName="creditCard" class="form-area">
           <h3>Credit Card</h3>
 
+          <!-- card type -->
           <div class="row">
             <div class="col-md-2">
               <label>Card Type</label>
@@ -396,10 +397,25 @@
                   <option>Visa</option>
                   <option>Mastercard</option>
                 </select>
+                <div
+                  *ngIf="
+                    creditCardType?.invalid &&
+                    (creditCardType?.dirty || creditCardType?.touched)
+                  "
+                  class="alert alert-danger mt-1">
+                  <div
+                    *ngIf="
+                      creditCardType?.errors?.['required'] ||
+                      creditCardType?.errors?.['notOnlyWhitespace']
+                    ">
+                    Card type is required
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
+          <!-- name on card -->
           <div class="row">
             <div class="col-md-2">
               <label>Name on Card</label>
@@ -407,10 +423,29 @@
             <div class="col-md-9">
               <div class="input-space">
                 <input type="text" formControlName="nameOnCard" />
+                <div
+                  *ngIf="
+                    creditCardNameOnCard?.invalid &&
+                    (creditCardNameOnCard?.dirty ||
+                      creditCardNameOnCard?.touched)
+                  "
+                  class="alert alert-danger mt-1">
+                  <div
+                    *ngIf="
+                      creditCardNameOnCard?.errors?.['required'] ||
+                      creditCardNameOnCard?.errors?.['notOnlyWhitespace']
+                    ">
+                    Name on card is required
+                  </div>
+                  <div *ngIf="creditCardNameOnCard?.errors?.['minlength']">
+                    Name on card must be at least 2 characters
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
+          <!-- card number -->
           <div class="row">
             <div class="col-md-2">
               <label>Card Number</label>
@@ -418,10 +453,24 @@
             <div class="col-md-9">
               <div class="input-space">
                 <input type="text" formControlName="cardNumber" />
+                <div
+                  *ngIf="
+                    creditCardNumber?.invalid &&
+                    (creditCardNumber?.dirty || creditCardNumber?.touched)
+                  "
+                  class="alert alert-danger mt-1">
+                  <div *ngIf="creditCardNumber?.errors?.['required']">
+                    Card number is required
+                  </div>
+                  <div *ngIf="creditCardNumber?.errors?.['pattern']">
+                    Card number must be 16 digits long
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
+          <!-- security code -->
           <div class="row">
             <div class="col-md-2">
               <label>Security Code</label>
@@ -429,10 +478,25 @@
             <div class="col-md-9">
               <div class="input-space">
                 <input type="text" formControlName="securityCode" />
+                <div
+                  *ngIf="
+                    creditCardSecurityCode?.invalid &&
+                    (creditCardSecurityCode?.dirty ||
+                      creditCardSecurityCode?.touched)
+                  "
+                  class="alert alert-danger mt-1">
+                  <div *ngIf="creditCardSecurityCode?.errors?.['required']">
+                    Security code is required
+                  </div>
+                  <div *ngIf="creditCardSecurityCode?.errors?.['pattern']">
+                    Card number must be 3 digits long
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
+          <!-- expiration month -->
           <div class="row">
             <div class="col-md-2">
               <label>Expiration Month</label>
@@ -448,6 +512,7 @@
             </div>
           </div>
 
+          <!-- expiration year -->
           <div class="row">
             <div class="col-md-2">
               <label>Expiration Year</label>
@@ -469,7 +534,7 @@
         <!-- Order details -->
         <div class="form-area">
           <h3>Review Your Order</h3>
-          <p>Total Quantity:{{ totalQuantity }}</p>
+          <p>Total Quantity: {{ totalQuantity }}</p>
           <p>Shipping: FREE</p>
           <p>Total Price: {{ totalPrice | number: '1.2-2' | currency: '€' }}</p>
         </div>

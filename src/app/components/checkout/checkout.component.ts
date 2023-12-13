@@ -7,6 +7,7 @@ import {
 } from '@angular/forms';
 import { Country } from 'src/app/common/country';
 import { State } from 'src/app/common/state';
+import { CartService } from 'src/app/services/cart.service';
 import { ShopFormService } from 'src/app/services/shop-form.service';
 import { CheckoutValidators } from 'src/app/validators/checkout-validators';
 
@@ -26,11 +27,14 @@ export class CheckoutComponent implements OnInit {
   billingAddressStates: State[] = [];
 
   constructor(
+    private cartService: CartService,
     private formBuilder: FormBuilder,
     private shopFormService: ShopFormService
   ) {}
 
   ngOnInit(): void {
+    this.reviewCartDetails();
+    // create form group
     this.createFormGroup();
 
     // populate credit card months
@@ -48,6 +52,18 @@ export class CheckoutComponent implements OnInit {
       .getCountries()
       .subscribe(data => (this.countries = data));
   }
+
+  reviewCartDetails() {
+    // subscribe to cartService.totalQuantity
+    this.cartService.totalQuantity.subscribe(
+      totalQuantity => (this.totalQuantity = totalQuantity)
+    );
+    // subscribe to cartService.totalPrice
+    this.cartService.totalPrice.subscribe(
+      totalPrice => (this.totalPrice = totalPrice)
+    );
+  }
+
   private createFormGroup() {
     this.checkOutFormGroup = this.formBuilder.group({
       customer: this.formBuilder.group({
@@ -105,10 +121,20 @@ export class CheckoutComponent implements OnInit {
         ]),
       }),
       creditCard: this.formBuilder.group({
-        cardType: [''],
-        nameOnCard: [''],
-        cardNumber: [''],
-        securityCode: [''],
+        cardType: new FormControl('', [Validators.required]),
+        nameOnCard: new FormControl('', [
+          Validators.required,
+          Validators.minLength(2),
+          CheckoutValidators.notOnlyWhitespace,
+        ]),
+        cardNumber: new FormControl('', [
+          Validators.required,
+          Validators.pattern('[0-9]{16}'),
+        ]),
+        securityCode: new FormControl('', [
+          Validators.required,
+          Validators.pattern('[0-9]{3}'),
+        ]),
         expirationMonth: [''],
         expirationYear: [''],
       }),
@@ -240,5 +266,19 @@ export class CheckoutComponent implements OnInit {
   }
   get billingAddressZipCode() {
     return this.checkOutFormGroup.get('billingAddress.zipCode');
+  }
+
+  // credit card
+  get creditCardType() {
+    return this.checkOutFormGroup.get('creditCard.cardType');
+  }
+  get creditCardNameOnCard() {
+    return this.checkOutFormGroup.get('creditCard.nameOnCard');
+  }
+  get creditCardNumber() {
+    return this.checkOutFormGroup.get('creditCard.cardNumber');
+  }
+  get creditCardSecurityCode() {
+    return this.checkOutFormGroup.get('creditCard.securityCode');
   }
 }
