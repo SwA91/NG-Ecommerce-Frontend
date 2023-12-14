@@ -10,5 +10,12 @@
   "editor.tabSize": 2,
   "[jsonc]": {
     "editor.defaultFormatter": "vscode.json-language-features"
-  }
+  },
+  "cSpell.words": [
+    "devkit",
+    "flexbox",
+    "oidc",
+    "pkce",
+    "Signin"
+  ]
 }
