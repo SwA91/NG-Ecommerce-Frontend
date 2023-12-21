@@ -7,6 +7,7 @@ import { CartItem } from '../common/cart-item';
 })
 export class CartService {
   cartItems: CartItem[] = [];
+  // get last value this observable
   totalPrice: Subject<number> = new BehaviorSubject<number>(0);
   totalQuantity: Subject<number> = new BehaviorSubject<number>(0);
   storage: Storage = localStorage;

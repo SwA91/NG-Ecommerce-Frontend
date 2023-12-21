@@ -17,4 +17,11 @@
     class="security-btn ml-1">
     Member
   </button>
+
+  <button
+    *ngIf="isAuthenticated"
+    routerLink="/order-history"
+    class="security-btn ml-1">
+    Orders
+  </button>
 </div>
