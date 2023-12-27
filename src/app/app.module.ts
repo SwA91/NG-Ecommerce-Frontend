@@ -16,6 +16,7 @@ import { AppComponent } from './app.component';
 import { CartDetailsComponent } from './components/cart-details/cart-details.component';
 import { CartStatusComponent } from './components/cart-status/cart-status.component';
 import { CheckoutComponent } from './components/checkout/checkout.component';
+import { CheckoutOldComponent } from './components/checkout/checkout.component.old';
 import { LoginStatusComponent } from './components/login-status/login-status.component';
 import { LoginComponent } from './components/login/login.component';
 import { MembersPageComponent } from './components/members-page/members-page.component';
@@ -77,6 +78,7 @@ const routes: Routes = [
     ProductListComponent,
     SearchComponent,
     OrderHistoryComponent,
+    CheckoutOldComponent,
   ],
   imports: [
     CommonModule,

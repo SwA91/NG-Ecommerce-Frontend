@@ -9,21 +9,19 @@ import { Router } from '@angular/router';
 import { Country } from 'src/app/common/country';
 import { Order } from 'src/app/common/order';
 import { OrderItem } from 'src/app/common/order-item';
-import { PaymentInfo } from 'src/app/common/payment-info';
 import { Purchase } from 'src/app/common/purchase';
 import { State } from 'src/app/common/state';
 import { CartService } from 'src/app/services/cart.service';
 import { CheckoutService } from 'src/app/services/checkout.service';
 import { ShopFormService } from 'src/app/services/shop-form.service';
 import { CheckoutValidators } from 'src/app/validators/checkout-validators';
-import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-checkout',
   templateUrl: './checkout.component.html',
   styles: [],
 })
-export class CheckoutComponent implements OnInit {
+export class CheckoutOldComponent implements OnInit {
   checkOutFormGroup!: FormGroup;
   totalPrice: number = 0;
   totalQuantity: number = 0;
@@ -34,12 +32,6 @@ export class CheckoutComponent implements OnInit {
   billingAddressStates: State[] = [];
   storage: Storage = sessionStorage;
 
-  // initialize stripe api
-  stripe = Stripe(environment.stripePublishableKey);
-  paymentInfo: PaymentInfo = new PaymentInfo();
-  cardElement: any;
-  displayError: any = '';
-
   constructor(
     private router: Router,
     private checkoutService: CheckoutService,
@@ -49,41 +41,24 @@ export class CheckoutComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // setup stripe payment form
-    this.setupStripePaymentForm();
-
     this.reviewCartDetails();
     // create form group
     this.createFormGroup();
+
+    // populate credit card months
+    const startMonth = new Date().getMonth() + 1;
+    this.shopFormService
+      .getCreditCardMonths(startMonth)
+      .subscribe(data => (this.creditCardMonths = data));
+    // populate credit card years
+    this.shopFormService
+      .getCreditCardYears()
+      .subscribe(data => (this.creditCardYears = data));
 
     // populate countries
     this.shopFormService
       .getCountries()
       .subscribe(data => (this.countries = data));
-  }
-
-  setupStripePaymentForm() {
-    // get a handle to stripe elements
-    var elements = this.stripe.elements();
-
-    // create a car element ... and hide the zip-code field
-    this.cardElement = elements.create('card', { hidePostalCode: true });
-
-    // add an instance of card ui component into the 'card-element' div
-    this.cardElement.mount('#card-element');
-
-    // add event binding for the 'change' event on the card element
-    this.cardElement.on('change', (event: any) => {
-      // get a handle to card-errors element
-      this.displayError = document.getElementById('card-errors');
-
-      if (event.complete) {
-        this.displayError.textContent = '';
-      } else if (event.error) {
-        // show validation error to customer
-        this.displayError.textContent = event.error.message;
-      }
-    });
   }
 
   reviewCartDetails() {
@@ -155,7 +130,24 @@ export class CheckoutComponent implements OnInit {
           CheckoutValidators.notOnlyWhitespace,
         ]),
       }),
-      creditCard: this.formBuilder.group({}),
+      creditCard: this.formBuilder.group({
+        cardType: new FormControl('', [Validators.required]),
+        nameOnCard: new FormControl('', [
+          Validators.required,
+          Validators.minLength(2),
+          CheckoutValidators.notOnlyWhitespace,
+        ]),
+        cardNumber: new FormControl('', [
+          Validators.required,
+          Validators.pattern('[0-9]{16}'),
+        ]),
+        securityCode: new FormControl('', [
+          Validators.required,
+          Validators.pattern('[0-9]{3}'),
+        ]),
+        expirationMonth: [''],
+        expirationYear: [''],
+      }),
     });
   }
 
@@ -261,61 +253,21 @@ export class CheckoutComponent implements OnInit {
     purchase.order = order;
     purchase.orderItems = orderItems;
 
-    // compute payment info
-    this.paymentInfo.amount = Math.round(this.totalPrice * 100);
-    this.paymentInfo.currency = 'EUR';
-    console.log(`Hey:`, this.paymentInfo);
-    // if valid form then
-    // - create payment intent
-    // - confirm card payment
-    // - place order
-    if (
-      !this.checkOutFormGroup.invalid &&
-      this.displayError.textContent === ''
-    ) {
-      this.checkoutService
-        .createPaymentIntent(this.paymentInfo)
-        .subscribe(paymentIntentResponse => {
-          this.stripe
-            .confirmCardPayment(
-              paymentIntentResponse.client_secret,
-              {
-                payment_method: {
-                  // past our form credit card
-                  card: this.cardElement,
-                },
-              },
-              {
-                handleActions: false,
-              }
-            )
-            .then((result: any) => {
-              if (result.error) {
-                // inform the customer there was an error
-                alert(`There was an error: ${result.error.message}`);
-              } else {
-                // call REST API via the CheckoutService
-                this.checkoutService.placeOrder(purchase).subscribe({
-                  next: resp => {
-                    console.log('next', resp);
-                    alert(
-                      `Your order has been received.\nOrder tracking number: ${resp.orderTrackingNumber}`
-                    );
-                    // reset cart
-                    this.resetCart();
-                  },
-                  error: err => {
-                    console.log('error', err);
-                    alert(`There was an error: ${err.message}`);
-                  },
-                });
-              }
-            });
-        });
-    } else {
-      this.checkOutFormGroup.markAllAsTouched();
-      return;
-    }
+    // call REST API  via the CheckoutService
+    this.checkoutService.placeOrder(purchase).subscribe({
+      next: resp => {
+        console.log('next', resp);
+        alert(
+          `Your order has been received. \n Order tracking number: ${resp.orderTrackingNumber}`
+        );
+        // reset cart
+        this.resetCart();
+      },
+      error: err => {
+        alert(`There was an error: ${err.message}`);
+        console.log('error', err);
+      },
+    });
   }
 
   resetCart() {
