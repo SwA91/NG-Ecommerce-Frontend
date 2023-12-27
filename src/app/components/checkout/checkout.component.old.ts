@@ -17,8 +17,8 @@ import { ShopFormService } from 'src/app/services/shop-form.service';
 import { CheckoutValidators } from 'src/app/validators/checkout-validators';
 
 @Component({
-  selector: 'app-checkout',
-  templateUrl: './checkout.component.html',
+  selector: 'app-checkout-old',
+  templateUrl: './checkout.component.old.html',
   styles: [],
 })
 export class CheckoutOldComponent implements OnInit {

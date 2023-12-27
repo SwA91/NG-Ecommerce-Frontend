@@ -40,6 +40,8 @@ export class CheckoutComponent implements OnInit {
   cardElement: any;
   displayError: any = '';
 
+  isDisabled: boolean = false;
+
   constructor(
     private router: Router,
     private checkoutService: CheckoutService,
@@ -264,7 +266,8 @@ export class CheckoutComponent implements OnInit {
     // compute payment info
     this.paymentInfo.amount = Math.round(this.totalPrice * 100);
     this.paymentInfo.currency = 'EUR';
-    console.log(`Hey:`, this.paymentInfo);
+    this.paymentInfo.receiptEmail = purchase.customer?.email;
+
     // if valid form then
     // - create payment intent
     // - confirm card payment
@@ -273,6 +276,7 @@ export class CheckoutComponent implements OnInit {
       !this.checkOutFormGroup.invalid &&
       this.displayError.textContent === ''
     ) {
+      this.isDisabled = true;
       this.checkoutService
         .createPaymentIntent(this.paymentInfo)
         .subscribe(paymentIntentResponse => {
@@ -283,6 +287,17 @@ export class CheckoutComponent implements OnInit {
                 payment_method: {
                   // past our form credit card
                   card: this.cardElement,
+                  billing_details: {
+                    email: purchase.customer?.email,
+                    name: `${purchase.customer?.firstName} ${purchase.customer?.lastName}`,
+                    address: {
+                      line1: purchase.billingAddress?.street,
+                      city: purchase.billingAddress?.city,
+                      state: purchase.billingAddress?.state,
+                      postal_code: purchase.billingAddress?.zipCode,
+                      country: this.billingAddressCountry?.value.code,
+                    },
+                  },
                 },
               },
               {
@@ -293,6 +308,7 @@ export class CheckoutComponent implements OnInit {
               if (result.error) {
                 // inform the customer there was an error
                 alert(`There was an error: ${result.error.message}`);
+                this.isDisabled = false;
               } else {
                 // call REST API via the CheckoutService
                 this.checkoutService.placeOrder(purchase).subscribe({
@@ -303,10 +319,12 @@ export class CheckoutComponent implements OnInit {
                     );
                     // reset cart
                     this.resetCart();
+                    this.isDisabled = false;
                   },
                   error: err => {
                     console.log('error', err);
                     alert(`There was an error: ${err.message}`);
+                    this.isDisabled = false;
                   },
                 });
               }
@@ -323,6 +341,7 @@ export class CheckoutComponent implements OnInit {
     this.cartService.cartItems = [];
     this.cartService.totalPrice.next(0);
     this.cartService.totalQuantity.next(0);
+    this.cartService.persistCartItems();
 
     // reset the form
     this.checkOutFormGroup.reset();
